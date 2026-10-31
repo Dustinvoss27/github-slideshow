@@ -1,0 +1,7 @@
+out/
+__pycache__/
+*.tmp
+client_secret*.json
+# media is large and usually licensed per-person: keep it out of git unless you mean it
+assets/vods/*
+!assets/vods/README.md

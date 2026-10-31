@@ -1,0 +1,6 @@
+edge-tts>=7.0
+pillow>=10.0
+numpy>=1.26
+anthropic>=0.75
+google-api-python-client>=2.100
+google-auth>=2.23
