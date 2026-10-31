@@ -1,0 +1,63 @@
+{
+  "channel_name": "Word Drop",
+  "channel_handle": "@worddrop",
+
+  "voice": "en-US-AndrewMultilingualNeural",
+  "voice_rate": "+6%",
+  "pause_between_segments": 0.25,
+
+  "use_claude": true,
+  "claude_model": "claude-opus-5-5",
+
+  "video": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "music_volume": 0.10
+  },
+
+  "themes": [
+    { "name": "gold",   "accent": "#FFD400", "panel": [0, 0, 0, 175] },
+    { "name": "mint",   "accent": "#3DFFB0", "panel": [8, 20, 30, 180] },
+    { "name": "coral",  "accent": "#FF6B6B", "panel": [20, 0, 10, 180] },
+    { "name": "sky",    "accent": "#4FC3FF", "panel": [0, 10, 30, 180] },
+    { "name": "violet", "accent": "#C38BFF", "panel": [15, 0, 30, 180] }
+  ],
+
+  "cta_lines": [
+    "Use it in a sentence in the comments. New word every day.",
+    "Drop a sentence with it below. Follow so you don't miss tomorrow's.",
+    "Say it out loud three times. Follow for tomorrow's word.",
+    "Text this to the smartest person you know. New word tomorrow.",
+    "Now you know. Follow for a new word every single day."
+  ],
+
+  "youtube": {
+    "privacy": "public",
+    "category_id": "27",
+    "made_for_kids": false,
+    "contains_synthetic_media": false,
+    "default_tags": ["word of the day", "vocabulary", "english", "learn english", "shorts"],
+    "default_hashtags": ["#shorts", "#wordoftheday", "#vocabulary"]
+  },
+
+  "clips": {
+    "clip_seconds": 30,
+    "clips_per_vod": 3,
+    "peak_position": 0.7,
+    "min_gap_seconds": 45,
+    "min_loudness_jump": 1.3,
+    "hook_lines": [
+      "Wait for the ending...",
+      "This did NOT go as planned",
+      "Rate this play 1-10",
+      "I can't believe this worked",
+      "Nobody expected this",
+      "Watch closely...",
+      "The timing on this..."
+    ],
+    "category_id": "20",
+    "default_tags": ["gaming", "gameplay", "clips", "shorts"],
+    "default_hashtags": ["#shorts", "#gaming", "#clips"]
+  }
+}
