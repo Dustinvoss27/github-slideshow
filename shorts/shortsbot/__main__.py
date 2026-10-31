@@ -98,7 +98,8 @@ def cmd_clips(args) -> int:
     if not vods:
         print(f"[clips] no new recordings in {args.vods}")
         return 0
-    can_upload = args.upload and youtube.configured()
+    prefix = youtube.clips_prefix()
+    can_upload = args.upload and youtube.configured(prefix)
     made = []
     with tempfile.TemporaryDirectory() as tmp:
         for vod in vods:
@@ -119,7 +120,7 @@ def cmd_clips(args) -> int:
         }
         save_json(clip["path"].with_suffix(".json"), meta)
         if can_upload and not args.dry_run:
-            vid = youtube.upload(clip["path"], meta, cfg["youtube"], when)
+            vid = youtube.upload(clip["path"], meta, cfg["youtube"], when, prefix)
             state["uploads"].append({"date": dt.date.today().isoformat(), "clip": clip["path"].name,
                                      "youtube_id": vid, "publish_at": when})
     if not args.dry_run:

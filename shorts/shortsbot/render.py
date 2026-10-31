@@ -1,4 +1,4 @@
-"""Compose the vertical video: gameplay/gradient background + word card + karaoke captions."""
+"""Compose the vertical video: animated gradient background + word card + karaoke captions."""
 from __future__ import annotations
 
 import random
@@ -6,8 +6,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .common import (ASSETS, AUDIO_EXTS, VIDEO_EXTS, hex_to_rgb, pick_random,
-                     probe_duration, run_ffmpeg)
+from .common import ASSETS, AUDIO_EXTS, hex_to_rgb, pick_random, run_ffmpeg
 
 WHITE = (255, 255, 255, 255)
 BLACK = (0, 0, 0, 255)
@@ -179,34 +178,21 @@ def build_overlay(tts: dict, painter: Painter, workdir: Path) -> Path:
 
 
 # ---------------------------------------------------------------- final compose
-def background_input(cfg: dict, duration: float, rng: random.Random, theme: dict) -> tuple[list[str], str]:
+def background_input(cfg: dict, duration: float, theme: dict) -> tuple[list[str], str]:
+    """Slow animated gradient in the day's theme colour (no gameplay: the formats stay separate)."""
     v = cfg["video"]
     W, H, fps = v["width"], v["height"], v["fps"]
-    clip = pick_random(ASSETS / "gameplay", VIDEO_EXTS, rng)
-    dark = v.get("darken_background", 0.15)
-    if clip:
-        clip_dur = probe_duration(clip)
-        if clip_dur > duration + 2:
-            start = rng.uniform(0, clip_dur - duration - 1)
-            args = ["-ss", f"{start:.2f}", "-t", f"{duration + 0.5:.2f}", "-i", str(clip)]
-        else:
-            args = ["-stream_loop", "-1", "-t", f"{duration + 0.5:.2f}", "-i", str(clip)]
-        vf = (f"[0:v]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},setsar=1,"
-              f"fps={fps},eq=brightness={-dark:.2f}:saturation=1.15[bg]")
-        print(f"[render] background: {clip.name}")
-        return args, vf
     a = theme["accent"].lstrip("#")
     args = ["-f", "lavfi", "-t", f"{duration + 0.5:.2f}", "-i",
             f"gradients=s={W}x{H}:r={fps}:c0=0x0b0b1a:c1=0x{a}:c2=0x10102a:nb_colors=3:speed=0.015:type=radial"]
-    vf = f"[0:v]setsar=1,eq=brightness=-0.25:saturation=0.8[bg]"
-    print("[render] background: animated gradient (add clips to assets/gameplay/ for gameplay backgrounds)")
+    vf = "[0:v]setsar=1,eq=brightness=-0.25:saturation=0.8[bg]"
     return args, vf
 
 
 def compose(cfg: dict, tts: dict, overlay_list: Path, theme: dict, rng: random.Random, out: Path) -> Path:
     v = cfg["video"]
     D = tts["duration"]
-    bg_args, bg_filter = background_input(cfg, D, rng, theme)
+    bg_args, bg_filter = background_input(cfg, D, theme)
     inputs = [*bg_args, "-f", "concat", "-safe", "0", "-i", str(overlay_list), "-i", str(tts["audio"])]
     music = pick_random(ASSETS / "music", AUDIO_EXTS, rng)
     accent = theme["accent"].lstrip("#")

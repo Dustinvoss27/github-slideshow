@@ -13,9 +13,7 @@
     "width": 1080,
     "height": 1920,
     "fps": 30,
-    "music_volume": 0.10,
-    "gameplay_volume": 0.0,
-    "darken_background": 0.18
+    "music_volume": 0.10
   },
 
   "themes": [

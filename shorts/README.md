@@ -1,16 +1,18 @@
 # shortsbot: automated faceless Shorts
 
-Two content engines for a faceless channel, both producing 1080×1920 vertical videos ready for
-YouTube Shorts, TikTok, Instagram Reels and Facebook Reels:
+Two **separate** content formats, each producing 1080×1920 vertical videos ready for
+YouTube Shorts, TikTok, Instagram Reels and Facebook Reels. They never mix: pick one for your
+channel, or run each on its own channel.
 
 | Engine | What it makes | Runs |
 |---|---|---|
-| `wotd` | **Word of the day** with a hook, AI voice, word-by-word captions, word card, progress bar, over gameplay footage | Daily on GitHub Actions, fully hands-off |
+| `wotd` | **Word of the day** with a hook, AI voice, word-by-word captions, word card and progress bar on an animated colour background | Daily on GitHub Actions, fully hands-off. Needs no footage |
 | `clips` | **Gameplay highlights**: finds the hype moments in your long recordings by audio spikes, cuts 30 s vertical clips with a hook banner | On your PC (recordings are too big for git), schedules a week of uploads at once |
 
-The format that tends to work: **"word of the day" narration over satisfying gameplay**
-(parkour, runners, racing). The gameplay holds attention, the word gives people a reason to
-stay to the end and comment.
+**Word of the day** is the fully automatic one: nothing to supply, posts itself every day.
+**Gameplay clips** depend on you recording new gameplay regularly. If you run both, use two
+channels (see "Running clips on a second channel" below) so each channel's audience gets one
+consistent format; mixing niches on one channel confuses the algorithm and your subscribers.
 
 ---
 
@@ -26,7 +28,7 @@ stay to the end and comment.
 
 * Word-level captions with the spoken word highlighted (most viewers watch on mute)
 * Progress bar along the bottom (people stay longer when they can see the end)
-* 5 colour themes that rotate daily, plus a random gameplay clip and start point each time,
+* Slow-moving gradient background in one of 5 colour themes that rotate daily,
   so uploads don't all look the same
 * Loudness-normalised to −14 LUFS (platform standard)
 * Words come from **Claude** (fresh, never repeated, with title/description/tags), or from
@@ -36,13 +38,9 @@ stay to the end and comment.
 
 ## Setup (about 30 minutes, once)
 
-### 1. Add background footage
-Put a few gameplay clips (1–10 min each) in `assets/gameplay/` and commit them. **Record them
-yourself** (Minecraft parkour, a runner game, racing) or use clips whose licence explicitly allows
-commercial reuse. Without clips you get an animated gradient background.
-
-Optional: music from the YouTube Audio Library in `assets/music/`, a bold font in `assets/fonts/`.
+### 1. Personalise
 Change `channel_name` / `channel_handle` in `config.json`.
+Optional: music from the YouTube Audio Library in `assets/music/`, a bold font in `assets/fonts/`.
 
 ### 2. YouTube API access
 1. [Google Cloud Console](https://console.cloud.google.com/) → new project → enable **YouTube Data API v3**.
@@ -96,6 +94,13 @@ python -m shortsbot clips --upload --schedule-hours 8     # cut + schedule one e
 
 `SHORTS_TTS=silent` renders with silent audio and estimated timings (layout previews offline).
 
+### Running clips on a second channel
+By default both tools upload to the channel behind `YT_CLIENT_ID` / `YT_CLIENT_SECRET` /
+`YT_REFRESH_TOKEN`. To send clips somewhere else, run `tools/get_youtube_token.py` again while
+signed in to the second channel and set the results as `YT_CLIPS_CLIENT_ID`,
+`YT_CLIPS_CLIENT_SECRET`, `YT_CLIPS_REFRESH_TOKEN` (environment variables on your PC, since
+clips run locally). When those are set, `clips` uses them automatically.
+
 ---
 
 ## Posting to TikTok, Instagram and Facebook
@@ -117,7 +122,7 @@ from long-form, sponsors and affiliate links once you have an audience.
 
 **The biggest risk to an automated channel is YouTube's "inauthentic content" policy** (formerly
 "repetitious content"). It demonetises channels that publish mass-produced, near-identical videos.
-This project already varies themes, gameplay, hooks and CTAs, but you should also:
+This project already varies colour themes, hooks and CTAs, but you should also:
 
 * **Review videos before they go public** for the first few weeks (`--schedule-hours` gives you a
   window to watch and delete bad ones). AI occasionally gets a pronunciation or definition wrong.
@@ -132,7 +137,7 @@ This project already varies themes, gameplay, hooks and CTAs, but you should als
 **Growth levers to test** (change one thing at a time, compare after ~7 videos):
 1. Hook wording: "There's a word for…" vs. "Only 1% of people know…" vs. a question.
 2. Posting time: try 2–3 slots per day once things are stable (add cron lines).
-3. Background: parkour vs. racing vs. satisfying sand-cutting style footage.
+3. Colour themes and fonts: edit `themes` in `config.json`, drop a font in `assets/fonts/`.
 4. Length: 20–30 s loops get more replays; 60 s+ is needed for TikTok payouts.
 5. Look at YouTube Studio → *Viewed vs. swiped away*. Under ~60% viewed means the first
    second needs work.
@@ -149,7 +154,6 @@ shorts/
   config.json            channel name, voice, themes, CTAs, YouTube defaults, clip settings
   data/words.json        fallback word bank (add your own)
   data/state.json        words already posted + upload log (committed by the workflow)
-  assets/gameplay/       background clips for word videos
   assets/vods/           long recordings for the clips engine (git-ignored)
   assets/music/ fonts/   optional
   shortsbot/             the code (content, tts, render, clips, youtube, CLI)

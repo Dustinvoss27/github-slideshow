@@ -1,6 +1,8 @@
 """Upload a video to YouTube with the Data API v3 (OAuth refresh token, no browser needed in CI).
 
 Required env vars: YT_CLIENT_ID, YT_CLIENT_SECRET, YT_REFRESH_TOKEN
+The clips tool uses YT_CLIPS_CLIENT_ID / YT_CLIPS_CLIENT_SECRET / YT_CLIPS_REFRESH_TOKEN instead
+when those are set, so clips can go to a separate channel.
 Get the refresh token once on your own computer with: python tools/get_youtube_token.py
 """
 from __future__ import annotations
@@ -12,26 +14,35 @@ from pathlib import Path
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
 
 
-def configured() -> bool:
-    return all(os.environ.get(k) for k in ("YT_CLIENT_ID", "YT_CLIENT_SECRET", "YT_REFRESH_TOKEN"))
+KEYS = ("CLIENT_ID", "CLIENT_SECRET", "REFRESH_TOKEN")
 
 
-def _client():
+def configured(prefix: str = "YT_") -> bool:
+    return all(os.environ.get(prefix + k) for k in KEYS)
+
+
+def clips_prefix() -> str:
+    """Use a separate channel for gameplay clips when YT_CLIPS_* secrets exist."""
+    return "YT_CLIPS_" if configured("YT_CLIPS_") else "YT_"
+
+
+def _client(prefix: str):
     from google.oauth2.credentials import Credentials
     from googleapiclient.discovery import build
 
     creds = Credentials(
         token=None,
-        refresh_token=os.environ["YT_REFRESH_TOKEN"],
-        client_id=os.environ["YT_CLIENT_ID"],
-        client_secret=os.environ["YT_CLIENT_SECRET"],
+        refresh_token=os.environ[prefix + "REFRESH_TOKEN"],
+        client_id=os.environ[prefix + "CLIENT_ID"],
+        client_secret=os.environ[prefix + "CLIENT_SECRET"],
         token_uri="https://oauth2.googleapis.com/token",
         scopes=SCOPES,
     )
     return build("youtube", "v3", credentials=creds, cache_discovery=False)
 
 
-def upload(video: Path, meta: dict, yt_cfg: dict, publish_at: str | None = None) -> str:
+def upload(video: Path, meta: dict, yt_cfg: dict, publish_at: str | None = None,
+           prefix: str = "YT_") -> str:
     from googleapiclient.errors import HttpError
     from googleapiclient.http import MediaFileUpload
 
@@ -54,7 +65,7 @@ def upload(video: Path, meta: dict, yt_cfg: dict, publish_at: str | None = None)
         "status": status,
     }
     media = MediaFileUpload(str(video), mimetype="video/mp4", chunksize=8 * 1024 * 1024, resumable=True)
-    request = _client().videos().insert(part="snippet,status", body=body, media_body=media)
+    request = _client(prefix).videos().insert(part="snippet,status", body=body, media_body=media)
 
     response, retries = None, 0
     while response is None:
